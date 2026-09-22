@@ -1,0 +1,77 @@
+<section class="py-16 max-w-7xl mx-auto px-4">
+  <h1 class="text-4xl font-bold text-center mb-12">Contact Us / Request a Quote</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+    <!-- Contact Info -->
+    <div>
+      <h2 class="text-2xl font-bold mb-6">Get in Touch</h2>
+      
+      <div class="space-y-4 text-gray-700">
+        <p>
+          <strong>Address:</strong><br>
+          Shop 2, Gozin Street Off Mbieri Road<br>
+          By Akwakuma Junction, Owerri, Imo State
+        </p>
+        <p>
+          <strong>Phone:</strong><br>
+          0803 604 5468<br>
+          0803 654 7874
+        </p>
+        <p>
+          <strong>Email:</strong><br>
+          excaletintegratedservices@gmail.com
+        </p>
+        <p>
+          <strong>Social:</strong><br>
+          @excaletintegratedservices
+        </p>
+      </div>
+    </div>
+
+    <!-- Quote Form -->
+    <div class="bg-gray-50 p-8 rounded-xl">
+      <h2 class="text-2xl font-bold mb-6">Request a Quote</h2>
+      
+      <form action="/contact" method="POST" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <input type="text" name="name" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Phone Number</label>
+          <input type="tel" name="phone" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Email (optional)</label>
+          <input type="email" name="email" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Service Needed</label>
+          <select name="service" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+            <option>Home Cleaning</option>
+            <option>Office Cleaning</option>
+            <option>Routine Cleaning</option>
+            <option>Post-Construction Cleaning</option>
+            <option>Pest Control</option>
+            <option>Fumigation</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Message</label>
+          <textarea name="message" rows="4" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+          Send Request
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section>
