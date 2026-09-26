@@ -48,7 +48,41 @@ app.get('/contact', (req, res) => {
   });
 });
 
-// ========== POST ROUTE (IMPORTANT) ==========
+// ========== SERVICE PAGES ==========
+app.get('/services/residential', (req, res) => {
+  res.render('services/residential', { 
+    title: 'Residential Cleaning & Pest Control | Excalet' 
+  });
+});
+
+app.get('/services/commercial', (req, res) => {
+  res.render('services/commercial', { 
+    title: 'Commercial Cleaning & Pest Management | Excalet' 
+  });
+});
+
+app.get('/services/facility-management', (req, res) => {
+  res.render('services/facility-management', { 
+    title: 'Facility Management | Excalet' 
+  });
+});
+
+app.get('/services/environmental', (req, res) => {
+  res.render('services/environmental', { 
+    title: 'Environmental & Sanitation | Excalet' 
+  });
+});
+app.get('/faq', (req, res) => {
+  res.render('faq', { 
+    title: 'FAQ | Excalet Integrated Services' 
+  });
+});
+app.get('/industries', (req, res) => {
+  res.render('industries', { 
+    title: 'Industries We Serve | Excalet Integrated Services' 
+  });
+});
+// ========== POST ROUTE ==========
 app.post('/contact', (req, res) => {
   const { name, phone, email, service, message } = req.body;
 
