@@ -1,26 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
+  
+  <title><%= typeof title !== 'undefined' ? title : 'Excalet Integrated Services' %></title>
+  
+  <meta name="description" content="<%= typeof description !== 'undefined' ? description : 'Professional cleaning, pest control, fumigation and facility management services in Owerri, Imo State. Excalet Integrated Services.' %>">
+  
+ <!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#16a34a',      // Green
-            secondary: '#0ea5e9',    // Cyan
-            dark: '#0f172a'
-          }
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: '#16a34a',
+          secondary: '#0ea5e9',
+          dark: '#0f172a'
         }
       }
     }
-  </script>
+  }
+</script>
+  ...
 </head>
 <body class="bg-white text-gray-800 font-sans">
 

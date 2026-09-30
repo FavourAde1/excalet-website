@@ -1,26 +1,25 @@
-<!-- ==================== HERO SECTION ==================== -->
 <!-- ==================== HERO CAROUSEL ==================== -->
+ <!-- ==================== HERO CAROUSEL ==================== -->
 <section class="relative overflow-hidden">
   
-  <!-- Carousel Container -->
   <div id="hero-carousel" class="relative w-full h-[520px] md:h-[620px]">
     
     <!-- Slide 1 -->
     <div class="carousel-slide absolute inset-0 transition-opacity duration-1000 opacity-100">
-      <img src="/images/slide1.png" alt="Professional cleaning result" class="w-full h-full object-cover">
-      <div class="absolute inset-0 bg-black/64"></div>
+      <img src="/images/hero-1.png" alt="Professional cleaning result" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-black/70"></div>
     </div>
 
     <!-- Slide 2 -->
     <div class="carousel-slide absolute inset-0 transition-opacity duration-1000 opacity-0">
-      <img src="/images/slide2.png" alt="Excalet team at work" class="w-full h-full object-cover">
-      <div class="absolute inset-0 bg-black/64"></div>
+      <img src="/images/hero-2.png" alt="Excalet team at work" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-black/70"></div>
     </div>
 
     <!-- Slide 3 -->
     <div class="carousel-slide absolute inset-0 transition-opacity duration-1000 opacity-0">
-      <img src="/images/slide3.png" alt="Pest control service" class="w-full h-full object-cover">
-      <div class="absolute inset-0 bg-black/64"></div>
+      <img src="/images/hero-3.png" alt="Pest control service" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-black/70"></div>
     </div>
 
     <!-- Text Overlay -->
@@ -29,13 +28,13 @@
         <div class="max-w-2xl text-white">
           <p class="text-green-300 font-semibold tracking-wide uppercase text-sm mb-4">Est. 2019</p>
           
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 drop-shadow-lg">
             One Team.<br>
             All-in-One Services.<br>
             Zero Vendor Hassle.
           </h1>
 
-          <p class="text-lg text-gray-100 mb-8 max-w-xl">
+          <p class="text-lg text-gray-100 mb-8 max-w-xl drop-shadow-md">
             From cleaning and pest control to fumigation and sanitation. Excalet handles the full spectrum of facility care.
           </p>
 
@@ -60,7 +59,6 @@
   </div>
 </section>
 
-<!-- Carousel Script -->
 <script>
   const slides = document.querySelectorAll('.carousel-slide');
   const dots = document.querySelectorAll('.carousel-dot');
@@ -83,7 +81,6 @@
     });
   });
 
-  // Auto play every 5 seconds
   setInterval(() => {
     showSlide((current + 1) % slides.length);
   }, 5000);
