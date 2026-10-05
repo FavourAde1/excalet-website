@@ -9,10 +9,14 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^16.6.1",
     "ejs": "^3.1.10",
     "express": "^4.22.3",
-    "express-ejs-layouts": "^2.5.1"
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.10.3",
+    "nodemailer": "^10.0.13"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
