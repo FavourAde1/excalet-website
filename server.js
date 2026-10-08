@@ -142,7 +142,7 @@ app.get('/services/environmental', (req, res) => {
   res.render('services/environmental', {
     title: 'Environmental & Sanitation | Excalet',
     description: 'Disinfection, waste management, drainage cleaning and grounds maintenance services.'
-  });
+  });   
 });
 
 // ========== ADMIN ROUTES ==========
@@ -244,21 +244,30 @@ app.post('/contact', async (req, res) => {
   try {
     const { name, phone, email, service, message } = req.body;
 
+    if (!name || !phone) {
+      return res.status(400).send(`
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 80px auto; text-align: center;">
+          <h1 style="color: #dc2626;">Missing Information</h1>
+          <p>Name and phone number are required.</p>
+          <br>
+          <a href="/contact" style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+            Go Back
+          </a>
+        </div>
+      `);
+    }
+
     const newQuote = new Quote({
-      name,
-      phone,
-      email,
-      service,
-      message
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email ? email.trim() : '',
+      service: service || '',
+      message: message ? message.trim() : ''
     });
 
     await newQuote.save();
-    await sendQuoteEmail(newQuote);
 
-    console.log('===== NEW QUOTE SAVED =====');
-    console.log('Name:', name);
-    console.log('Phone:', phone);
-    console.log('===========================');
+    console.log('Quote saved:', name, phone);
 
     res.send(`
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 80px auto; text-align: center;">
@@ -272,11 +281,36 @@ app.post('/contact', async (req, res) => {
       </div>
     `);
   } catch (error) {
-    console.error('Error saving quote:', error);
-    res.status(500).send('Something went wrong. Please try again.');
+    console.error('Error saving quote:', error.message);
+    res.status(500).send(`
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 80px auto; text-align: center;">
+        <h1 style="color: #dc2626;">Something went wrong</h1>
+        <p>We could not save your request. Please try again or contact us on WhatsApp.</p>
+        <br>
+        <a href="https://wa.me/2348036045468" style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-right: 10px;">
+          WhatsApp Us
+        </a>
+        <a href="/contact" style="background: #6b7280; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+          Try Again
+        </a>
+      </div>
+    `);
   }
 });
-
+// 404 handler
+app.use((req, res) => {
+  res.status(404).send(`
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 100px auto; text-align: center;">
+      <h1 style="font-size: 72px; color: #16a34a; margin: 0;">404</h1>
+      <h2 style="color: #111;">Page Not Found</h2>
+      <p style="color: #6b7280;">The page you are looking for does not exist.</p>
+      <br>
+      <a href="/" style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+        Back to Home
+      </a>
+    </div>
+  `);
+});
 // Start server
 if (require.main === module) {
   app.listen(PORT, () => {
