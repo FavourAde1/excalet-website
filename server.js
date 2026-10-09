@@ -335,6 +335,20 @@ app.use((req, res) => {
   `);
 });
 
+app.set('trust proxy', 1);
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'excalet_secret_key_2026',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
+
 // ========== START SERVER ==========
 if (require.main === module) {
   app.listen(PORT, () => {
