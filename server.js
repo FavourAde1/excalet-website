@@ -1,4 +1,3 @@
-const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
@@ -10,27 +9,66 @@ const Quote = require('./models/Quote');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middleware
+// ========== MIDDLEWARE ==========
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'excalet_secret',
+  secret: process.env.SESSION_SECRET || 'excalet_secret_key_2026',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+  }
 }));
 
-// EJS Setup
+// ========== EJS SETUP ==========
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// ========== MONGODB (Vercel serverless safe) ==========
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!global.mongooseCache) {
+  global.mongooseCache = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI is not set in Vercel Environment Variables');
+  }
+
+  if (global.mongooseCache.conn) {
+    return global.mongooseCache.conn;
+  }
+
+  if (!global.mongooseCache.promise) {
+    global.mongooseCache.promise = mongoose
+      .connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 15000,
+        bufferCommands: false
+      })
+      .then((m) => {
+        console.log('MongoDB connected');
+        return m;
+      });
+  }
+
+  try {
+    global.mongooseCache.conn = await global.mongooseCache.promise;
+  } catch (err) {
+    global.mongooseCache.promise = null;
+    throw err;
+  }
+
+  return global.mongooseCache.conn;
+}
+// Try connect on startup (works locally; on Vercel it runs per cold start)
+connectDB().catch(err => console.error('Initial DB connect failed:', err.message));
 
 // ========== AUTH MIDDLEWARE ==========
 function requireAdmin(req, res, next) {
@@ -39,34 +77,8 @@ function requireAdmin(req, res, next) {
   }
   res.redirect('/admin/login');
 }
-async function sendQuoteEmail(quote) {
-  // Only works if you configure real email credentials
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return;
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS   // use App Password, not normal password
-    }
-  });
-
-  await transporter.sendMail({
-    from: `"Excalet Website" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER,          // send to yourself
-    subject: `New Quote Request from ${quote.name}`,
-    html: `
-      <h2>New Quote Request</h2>
-      <p><strong>Name:</strong> ${quote.name}</p>
-      <p><strong>Phone:</strong> ${quote.phone}</p>
-      <p><strong>Email:</strong> ${quote.email || 'Not provided'}</p>
-      <p><strong>Service:</strong> ${quote.service || 'Not specified'}</p>
-      <p><strong>Message:</strong><br>${quote.message || 'No message'}</p>
-    `
-  });
-}
-
-// ========== GET ROUTES ==========
+// ========== PUBLIC GET ROUTES ==========
 app.get('/', (req, res) => {
   res.render('index', {
     title: 'Home | Excalet Integrated Services',
@@ -116,80 +128,72 @@ app.get('/industries', (req, res) => {
   });
 });
 
-// Service pages
+// ========== SERVICE PAGES ==========
 app.get('/services/residential', (req, res) => {
   res.render('services/residential', {
     title: 'Residential Cleaning & Pest Control | Excalet',
-    description: 'Professional home cleaning, post-construction cleaning and pest control services in Owerri.'
+    description: 'Professional home cleaning, post-construction cleaning and pest control services in Owerri.',
+    breadcrumbs: [
+      { label: 'Services', url: '/services' },
+      { label: 'Residential Cleaning & Pest Control' }
+    ]
   });
 });
 
 app.get('/services/commercial', (req, res) => {
   res.render('services/commercial', {
     title: 'Commercial Cleaning & Pest Management | Excalet',
-    description: 'Office, hotel, school and warehouse cleaning plus integrated pest management services.'
+    description: 'Office, hotel, school and warehouse cleaning plus integrated pest management services.',
+    breadcrumbs: [
+      { label: 'Services', url: '/services' },
+      { label: 'Commercial Cleaning & Pest Management' }
+    ]
   });
 });
 
 app.get('/services/facility-management', (req, res) => {
   res.render('services/facility-management', {
     title: 'Facility Management | Excalet',
-    description: 'Hard facility management including HVAC, electrical, plumbing and building maintenance services.'
+    description: 'Hard facility management including HVAC, electrical, plumbing and building maintenance services.',
+    breadcrumbs: [
+      { label: 'Services', url: '/services' },
+      { label: 'Facility Management' }
+    ]
   });
 });
 
 app.get('/services/environmental', (req, res) => {
   res.render('services/environmental', {
     title: 'Environmental & Sanitation | Excalet',
-    description: 'Disinfection, waste management, drainage cleaning and grounds maintenance services.'
-  });   
+    description: 'Disinfection, waste management, drainage cleaning and grounds maintenance services.',
+    breadcrumbs: [
+      { label: 'Services', url: '/services' },
+      { label: 'Environmental & Sanitation' }
+    ]
+  });
 });
 
 // ========== ADMIN ROUTES ==========
 app.get('/admin/login', (req, res) => {
+  if (req.session && req.session.isAdmin) {
+    return res.redirect('/admin/quotes');
+  }
   res.render('admin/login', {
     title: 'Admin Login | Excalet',
-    layout: false   // no main layout for login page
+    layout: false
   });
 });
 
 app.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
 
-  if (
-    username === process.env.ADMIN_USERNAME &&
-    password === process.env.ADMIN_PASSWORD
-  ) {
+  const validUser = username === process.env.ADMIN_USERNAME;
+  const validPass = password === process.env.ADMIN_PASSWORD;
+
+  if (validUser && validPass) {
     req.session.isAdmin = true;
     return res.redirect('/admin/quotes');
   }
-
-  app.post('/admin/login', async (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-    // Simple check (you can later store hashed password in .env or database)
-    const isUsernameCorrect = username === process.env.ADMIN_USERNAME;
-    
-    // For now we still compare plain password from .env
-    // To fully use bcrypt you should hash the password once and store the hash
-    const isPasswordCorrect = password === process.env.ADMIN_PASSWORD;
-
-    if (isUsernameCorrect && isPasswordCorrect) {
-      req.session.isAdmin = true;
-      return res.redirect('/admin/quotes');
-    }
-
-    res.render('admin/login', {
-      title: 'Admin Login | Excalet',
-      layout: false,
-      error: 'Invalid username or password'
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Login error');
-  }
-});
 
   res.render('admin/login', {
     title: 'Admin Login | Excalet',
@@ -200,27 +204,36 @@ app.post('/admin/login', (req, res) => {
 
 app.get('/admin/quotes', requireAdmin, async (req, res) => {
   try {
-    const quotes = await Quote.find().sort({ createdAt: -1 });
+    await connectDB();
+
+    const quotes = await Quote.find().sort({ createdAt: -1 }).lean();
+
     res.render('admin/quotes', {
       title: 'Admin - Quotes | Excalet',
       quotes,
       layout: false
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading quotes');
+    console.error('Quotes error:', err.message);
+    res.status(500).send(`
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 80px auto; text-align: center;">
+        <h1 style="color: #dc2626;">Error loading quotes</h1>
+        <p style="color: #374151;">${err.message}</p>
+        <p style="color: #6b7280; font-size: 14px; margin-top: 12px;">
+          Check MONGODB_URI in Vercel and Network Access in MongoDB Atlas (allow 0.0.0.0/0).
+        </p>
+        <br>
+        <a href="/admin/login" style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+          Back to Login
+        </a>
+      </div>
+    `);
   }
 });
 
-app.get('/admin/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/admin/login');
-});
-
-// ========== POST CONTACT (SAVE TO MONGODB) ==========
-// Mark as Contacted
 app.post('/admin/quotes/:id/contacted', requireAdmin, async (req, res) => {
   try {
+    await connectDB();
     await Quote.findByIdAndUpdate(req.params.id, { status: 'Contacted' });
     res.redirect('/admin/quotes');
   } catch (err) {
@@ -229,9 +242,9 @@ app.post('/admin/quotes/:id/contacted', requireAdmin, async (req, res) => {
   }
 });
 
-// Delete quote
 app.post('/admin/quotes/:id/delete', requireAdmin, async (req, res) => {
   try {
+    await connectDB();
     await Quote.findByIdAndDelete(req.params.id);
     res.redirect('/admin/quotes');
   } catch (err) {
@@ -240,8 +253,17 @@ app.post('/admin/quotes/:id/delete', requireAdmin, async (req, res) => {
   }
 });
 
+app.get('/admin/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/admin/login');
+  });
+});
+
+// ========== CONTACT FORM (SAVE QUOTE) ==========
 app.post('/contact', async (req, res) => {
   try {
+    await connectDB();
+
     const { name, phone, email, service, message } = req.body;
 
     if (!name || !phone) {
@@ -297,7 +319,8 @@ app.post('/contact', async (req, res) => {
     `);
   }
 });
-// 404 handler
+
+// ========== 404 HANDLER ==========
 app.use((req, res) => {
   res.status(404).send(`
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 100px auto; text-align: center;">
@@ -311,7 +334,8 @@ app.use((req, res) => {
     </div>
   `);
 });
-// Start server
+
+// ========== START SERVER ==========
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
