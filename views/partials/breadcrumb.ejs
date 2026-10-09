@@ -1,0 +1,17 @@
+<% if (typeof breadcrumbs !== 'undefined' && breadcrumbs.length) { %>
+<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-sm text-gray-500">
+  <ol class="flex flex-wrap items-center gap-2">
+    <li><a href="/" class="hover:text-green-600">Home</a></li>
+    <% breadcrumbs.forEach((item, i) => { %>
+      <li class="flex items-center gap-2">
+        <span>/</span>
+        <% if (item.url && i < breadcrumbs.length - 1) { %>
+          <a href="<%= item.url %>" class="hover:text-green-600"><%= item.label %></a>
+        <% } else { %>
+          <span class="text-gray-800 font-medium"><%= item.label %></span>
+        <% } %>
+      </li>
+    <% }) %>
+  </ol>
+</nav>
+<% } %>
